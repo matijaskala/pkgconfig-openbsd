@@ -33,7 +33,8 @@ my @PKGPATH = qw(/usr/lib/pkgconfig
 
 if (defined($ENV{PKG_CONFIG_LIBDIR}) && $ENV{PKG_CONFIG_LIBDIR}) {
 	@PKGPATH = split(/:/, $ENV{PKG_CONFIG_LIBDIR});
-} elsif (defined($ENV{PKG_CONFIG_PATH}) && $ENV{PKG_CONFIG_PATH}) {
+}
+if (defined($ENV{PKG_CONFIG_PATH}) && $ENV{PKG_CONFIG_PATH}) {
 	unshift(@PKGPATH, split(/:/, $ENV{PKG_CONFIG_PATH}));
 }
 
@@ -674,13 +675,13 @@ sub compare
 	# is there a valid non-numeric suffix to deal with later?
 	# accepted are (in order): a(lpha) < b(eta) < rc < ' '.
 	# suffix[0] is the 'alpha' part, suffix[1] is the '1' part in 'alpha1'.
-	if ($a =~ s/(rc|beta|b|alpha|a)(\d+)$//) {
+	if ($a =~ s/\-?(rc|beta|b|alpha|a)(\d+)$//) {
 		say_debug("valid suffix $1$2 found in $a$1$2.");
 		$suffix_a[0] = $1;
 		$suffix_a[1] = $2;
 	}
 
-	if ($b =~ s/(rc|beta|b|alpha|a)(\d+)$//) {
+	if ($b =~ s/\-?(rc|beta|b|alpha|a)(\d+)$//) {
 		say_debug("valid suffix $1$2 found in $b$1$2.");
 		$suffix_b[0] = $1;
 		$suffix_b[1] = $2;
