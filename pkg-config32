@@ -25,9 +25,9 @@ use File::Basename;
 use File::stat;
 
 my @PKGPATH = qw(
-	/usr/lib/pkgconfig
+	/usr/lib32/pkgconfig
 	/usr/share/pkgconfig
-	/usr/local/lib/pkgconfig
+	/usr/local/lib32/pkgconfig
 	/usr/local/share/pkgconfig
 );
 
