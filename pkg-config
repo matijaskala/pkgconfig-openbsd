@@ -24,6 +24,38 @@ use Getopt::Long;
 use File::Basename;
 use File::stat;
 
+# specific properties may have specific needs.
+
+my $parse = {
+	Requires => sub {
+	    my @l = split(/[,\s]+/, shift);
+	    my @r = ();
+	    while (@l > 0) {
+		    my $n = shift @l;
+		    if ($n =~ m/[<=>]+$/) {
+			    if (@l > 0) {
+				    $n .= shift @l;
+			    }
+		    }
+		    if ($n =~ m/^[<=>]+/) {
+			    if (@r > 0) {
+				    $n = (pop @r).$n;
+			    }
+		    }
+		    push(@r, $n);
+	    }
+	    return \@r;
+	},
+};
+
+
+my $write = {
+	Libs => sub { " ".__PACKAGE__->compress(shift) }
+};
+
+$parse->{'Requires.private'} = $parse->{Requires};
+$write->{'Libs.private'} = $write->{Libs};
+
 my @PKGPATH = qw(
 	/usr/lib/pkgconfig
 	/usr/share/pkgconfig
@@ -899,38 +931,6 @@ use warnings;
 # this is a 'special' package, interface to the *.pc file format of pkg-config.
 package OpenBSD::PkgConfig;
 
-# specific properties may have specific needs.
-
-my $parse = {
-	Requires => sub {
-	    my @l = split(/[,\s]+/, shift);
-	    my @r = ();
-	    while (@l > 0) {
-		    my $n = shift @l;
-		    if ($n =~ m/[<=>]+$/) {
-			    if (@l > 0) {
-				    $n .= shift @l;
-			    }
-		    }
-		    if ($n =~ m/^[<=>]+/) {
-			    if (@r > 0) {
-				    $n = (pop @r).$n;
-			    }
-		    }
-		    push(@r, $n);
-	    }
-	    return \@r;
-	},
-};
-
-
-my $write = {
-	Libs => sub { " ".__PACKAGE__->compress(shift) }
-};
-
-$parse->{'Requires.private'} = $parse->{Requires};
-$write->{'Libs.private'} = $write->{Libs};
-
 sub new
 {
 	my $class = shift;
@@ -958,8 +958,6 @@ sub parse_value
 	my ($self, $name, $value) = @_;
 	if (defined $parse->{$name}) {
 		return $parse->{$name}($value);
-	} elsif ($name =~ s/^Requires//) {
-		return [split /(?<!\\),\s*/, $value];
 	} else {
 		return [split /(?<!\\)\s+/, $value];
 	}
