@@ -350,9 +350,17 @@ sub handle_config
 	    return unless defined $deps;
 	    for my $dep (@$deps) {
 		    if ($dep =~ m/^(.*?)\s*([<=>]+)\s*([\d\.]+|[\d\.]+[\w]*[\d]+)$/) {
-			    handle_config($1, $2, $3, $list);
+			    if (exists $configs{$1}) {
+				    if (!versionmatch($configs{$1}, $2, $3)) {
+					    mismatch($1, $configs{$1}, $2, $3) if $mode{printerr};
+					    $rc = 1;
+					    return undef;
+				    }
+			    } else {
+				    handle_config($1, $2, $3, $list);
+			    }
 		    } else {
-			    handle_config($dep, undef, undef, $list);
+			    handle_config($dep, undef, undef, $list) unless exists $configs{$dep};
 		    }
 	    }
 	    say_debug("package $p " . lc($property) . " " . join(',', @$deps));
