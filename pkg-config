@@ -782,8 +782,10 @@ sub do_cflags
 	for my $pkg (@$list) {
 		my $l = $configs{$pkg}->get_property('Cflags', $variables);
 		PATH: for my $path (@$l) {
-			for my $sys_path (@sys_includes) {
-				next PATH if ($path =~ /${sys_path}\/*$/);
+			if (!(defined($ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS}) && $ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS})) {
+				for my $sys_path (@sys_includes) {
+					next PATH if ($path =~ /${sys_path}\/*$/);
+				}
 			}
 			push(@$cflags, $path);
 		}
@@ -819,14 +821,14 @@ sub do_libs
 	for my $pkg (@$list) {
 		my $l = $configs{$pkg}->get_property('Libs', $variables);
 		for my $path (@$l) {
-			unless ($path =~ /-L\/usr\/lib\/*$/) {
+			unless ($path =~ /-L\/usr\/lib.?(32|64)?\/*$/ && !(defined($ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS}) && $ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS})) {
 				push(@$libs, $path);
 			}
 		}
 		if ($mode{static}) {
 			my $lp = $configs{$pkg}->get_property('Libs.private', $variables);
 			for my $path (@$lp) {
-				unless ($path =~ /-L\/usr\/lib\/*/) {
+				unless ($path =~ /-L\/usr\/lib.?(32|64)?\/*/ && !(defined($ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS}) && $ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS})) {
 			   		push(@$libs, $path);
 				}
 			}
